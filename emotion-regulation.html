@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Regulation Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            background: linear-gradient(90deg, #00c9ff, #92fe9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.05em;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .card .subtitle {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .scale-container {
+            position: relative;
+            padding: 10px 0;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.85em;
+            color: #bbb;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        #problemSlider {
+            background: linear-gradient(90deg, #4ade80, #facc15, #ef4444);
+        }
+        #problemSlider::-webkit-slider-thumb { background: #3b82f6; }
+        #problemSlider::-moz-range-thumb { background: #3b82f6; }
+
+        #reactionSlider {
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f43f5e);
+        }
+        #reactionSlider::-webkit-slider-thumb { background: #f97316; }
+        #reactionSlider::-moz-range-thumb { background: #f97316; }
+
+        .value-display {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .value-badge {
+            display: inline-block;
+            font-size: 2em;
+            font-weight: 700;
+            width: 65px;
+            height: 65px;
+            line-height: 65px;
+            border-radius: 50%;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .value-label {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+
+        #problemValue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 2px solid rgba(59, 130, 246, 0.4); }
+        #reactionValue { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 2px solid rgba(249, 115, 22, 0.4); }
+
+        .number-ticks {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            margin-top: 4px;
+        }
+
+        .number-ticks span {
+            font-size: 0.75em;
+            color: #666;
+            width: 20px;
+            text-align: center;
+        }
+
+        .btn-analyze {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+            margin-bottom: 30px;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-analyze:active {
+            transform: translateY(0);
+        }
+
+        /* Results Section */
+        #results {
+            display: none;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .gap-meter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .gap-meter .circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .gap-meter .arrow {
+            font-size: 1.5em;
+            color: #888;
+        }
+
+        .gap-meter .problem-circle { background: rgba(59,130,246,0.2); color: #60a5fa; border: 2px solid rgba(59,130,246,0.4); }
+        .gap-meter .reaction-circle { background: rgba(249,115,22,0.2); color: #fb923c; border: 2px solid rgba(249,115,22,0.4); }
+
+        .assessment {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .assessment.proportional { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: #86efac; }
+        .assessment.slightly-elevated { background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.3); color: #fde047; }
+        .assessment.elevated { background: rgba(251,146,60,0.12); border: 1px solid rgba(251,146,60,0.3); color: #fdba74; }
+        .assessment.highly-elevated { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: #fca5a5; }
+
+        .strategies-section h3 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #c4b5fd;
+            text-align: center;
+        }
+
+        .strategy-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .strategy-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .strategy-card .strategy-icon {
+            font-size: 1.6em;
+            margin-bottom: 8px;
+        }
+
+        .strategy-card h4 {
+            font-size: 1.05em;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        .strategy-card p {
+            font-size: 0.92em;
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .strategy-card .try-this {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 14px;
+            font-size: 0.82em;
+            background: rgba(139,92,246,0.2);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 20px;
+            color: #c4b5fd;
+        }
+
+        .btn-reset {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            font-size: 1em;
+            color: #aaa;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .disclaimer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 15px;
+            font-size: 0.8em;
+            color: #666;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.6em; }
+            .card { padding: 22px; }
+            .gap-meter .circle { width: 55px; height: 55px; font-size: 1.2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Emotion Regulation Tool</h1>
+            <p>Assess the gap between a problem's actual severity and your emotional reaction, then receive evidence-based strategies to help you regulate and respond effectively.</p>
+        </header>
+
+        <!-- Step 1: Problem Severity -->
+        <div class="card" id="problemCard">
+            <h2>Step 1: How Critical Is the Problem?</h2>
+            <p class="subtitle">Objectively rate how serious the situation actually is. Think about real-world consequences — will this matter in a week? A month? A year?</p>
+            <div class="scale-container">
+                <div class="scale-labels">
+                    <span>Minor inconvenience</span>
+                    <span>Life-altering crisis</span>
+                </div>
+                <div class="slider-wrapper">
+                    <input type="range" id="problemSlider" min="1" max="10" value="5">
+                </div>
+                <div class="number-ticks">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                </div>
+            </div>
+            <div class="value-display">
+                <span class="value-badge" id="problemValue">5</span>
+                <span class="value-label">Problem Severity</span>
+            </div>
+        </div>
+
+        <!-- Step 2: Emotional Reaction -->
+        <div class="card" id="reactionCard">
+            <h2>Step 2: What Is Your Emotional Reaction?</h2>
+            <p class="subtitle">Honestly rate the intensity of your emotional response right now. How defensive, angry, anxious, or overwhelmed do you feel?</p>
+            <div class="scale-container">
+                <div class="scale-labels">
+                    <span>Calm &amp; collected</span>
+                    <span>Completely overwhelmed</span>
+                </div>
+                <div class="slider-wrapper">
+                    <input type="range" id="reactionSlider" min="1" max="10" value="5">
+                </div>
+                <div class="number-ticks">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                </div>
+            </div>
+            <div class="value-display">
+                <span class="value-badge" id="reactionValue">5</span>
+                <span class="value-label">Emotional Reaction</span>
+            </div>
+        </div>
+
+        <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">Analyze &amp; Get Strategies</button>
+
+        <!-- Results -->
+        <div id="results">
+            <div class="card">
+                <div class="results-header">
+                    <h2>Your Assessment</h2>
+                </div>
+                <div class="gap-meter">
+                    <div>
+                        <div class="circle problem-circle" id="resultProblem">5</div>
+                        <div style="text-align:center;font-size:0.75em;color:#888;margin-top:6px;">Problem</div>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div>
+                        <div class="circle reaction-circle" id="resultReaction">5</div>
+                        <div style="text-align:center;font-size:0.75em;color:#888;margin-top:6px;">Reaction</div>
+                    </div>
+                </div>
+                <div class="assessment" id="assessmentBox"></div>
+            </div>
+
+            <div class="strategies-section">
+                <h3>✨ Recommended Regulation Strategies</h3>
+                <div id="strategiesContainer"></div>
+            </div>
+
+            <button class="btn-reset" onclick="resetTool()">↻ Start Over</button>
+        </div>
+
+        <div class="disclaimer">
+            This tool is for personal self-reflection and is not a substitute for professional mental health support.<br>
+            Strategies are based on commonly recognized CBT, DBT, and mindfulness approaches.
+        </div>
+    </div>
+
+    <script>
+        const problemSlider = document.getElementById('problemSlider');
+        const reactionSlider = document.getElementById('reactionSlider');
+        const problemValue = document.getElementById('problemValue');
+        const reactionValue = document.getElementById('reactionValue');
+
+        problemSlider.addEventListener('input', () => { problemValue.textContent = problemSlider.value; });
+        reactionSlider.addEventListener('input', () => { reactionValue.textContent = reactionSlider.value; });
+
+        // Strategy database
+        const strategies = {
+            grounding: {
+                icon: "🌍",
+                title: "5-4-3-2-1 Grounding Technique",
+                description: "Engage your senses to anchor yourself in the present moment. Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, and 1 you can taste.",
+                tryThis: "Do this right now — pause and slowly work through each sense."
+            },
+            breathing: {
+                icon: "🫁",
+                title: "Box Breathing (4-4-4-4)",
+                description: "Breathe in for 4 seconds, hold for 4, exhale for 4, hold for 4. This activates your parasympathetic nervous system and reduces the fight-or-flight response.",
+                tryThis: "Repeat for 4 cycles before re-evaluating the situation."
+            },
+            cognitive: {
+                icon: "🔄",
+                title: "Cognitive Reframing",
+                description: "Challenge automatic negative thoughts by asking: What evidence supports this thought? What evidence contradicts it? Is there another way to interpret this situation?",
+                tryThis: "Write down your thought, then write 2 alternative interpretations."
+            },
+            selfCompassion: {
+                icon: "💜",
+                title: "Self-Compassion Break",
+                description: "Acknowledge your suffering ('This is hard'), remind yourself you're not alone ('Others feel this too'), and offer yourself kindness ('May I be gentle with myself').",
+                tryThis: "Place your hand on your chest and say these three phrases slowly."
+            },
+            opposite: {
+                icon: "↔️",
+                title: "Opposite Action (DBT)",
+                description: "When your emotion doesn't fit the facts, act opposite to the urge. If anger says 'attack,' gently step away. If shame says 'hide,' reach out to someone you trust.",
+                tryThis: "Identify the urge — then do the opposite for 10 minutes."
+            },
+            tipp: {
+                icon: "🧊",
+                title: "TIPP Skills (DBT Crisis Survival)",
+                description: "Temperature — splash cold water on your face or hold ice. Intense exercise — do 5 minutes of jumping jacks. Paced breathing — slow exhales. Paired muscle relaxation — tense and release.",
+                tryThis: "Start with cold water on your wrists or face for 30 seconds."
+            },
+            defusion: {
+                icon: "💭",
+                title: "Thought Defusion",
+                description: "Instead of 'I'm a failure,' say 'I'm having the thought that I'm a failure.' This creates distance between you and the thought, reducing its power over your emotions.",
+                tryThis: "Prefix your strongest negative thought with 'I notice I'm having the thought that…'"
+            },
+            validation: {
+                icon: "✅",
+                title: "Self-Validation",
+                description: "Acknowledge that your emotional response makes sense given your history and experiences, even if the intensity doesn't match the current situation. Feelings are valid — but they aren't always factual.",
+                tryThis: "Say: 'It makes sense I feel this way because… AND I can choose how to respond.'"
+            },
+            timeout: {
+                icon: "⏸️",
+                title: "Strategic Pause / Time-Out",
+                description: "Remove yourself from the triggering situation for 20–30 minutes. Let your nervous system calm down before responding. This is not avoidance — it's intentional regulation.",
+                tryThis: "Tell the other person: 'I need 20 minutes, then I'd like to continue this.'"
+            },
+            journaling: {
+                icon: "📝",
+                title: "Expressive Writing",
+                description: "Write freely about what you're feeling for 5–10 minutes without editing. Research shows this reduces emotional intensity by labeling and externalizing feelings.",
+                tryThis: "Set a 5-minute timer and write without stopping — don't censor yourself."
+            },
+            radical: {
+                icon: "🙌",
+                title: "Radical Acceptance (DBT)",
+                description: "Acknowledge reality exactly as it is, without fighting it. Acceptance doesn't mean approval — it means you stop suffering over what you cannot change and redirect energy to what you can.",
+                tryThis: "Say: 'I cannot change what happened. I CAN choose what I do next.'"
+            },
+            perspective: {
+                icon: "🔭",
+                title: "10-10-10 Perspective Check",
+                description: "Ask yourself: How will I feel about this in 10 minutes? 10 months? 10 years? This shrinks the emotional weight of the moment and activates your rational brain.",
+                tryThis: "Answer all three honestly — write it down if it helps."
+            },
+            movement: {
+                icon: "🏃",
+                title: "Physical Discharge",
+                description: "Intense emotions create physical energy. Walk briskly, stretch, do push-ups, or shake your hands vigorously. Moving your body metabolizes stress hormones like cortisol and adrenaline.",
+                tryThis: "Take a 5-minute brisk walk right now — no phone."
+            },
+            wise: {
+                icon: "⚖️",
+                title: "Wise Mind (DBT)",
+                description: "Your 'Emotion Mind' is reacting; your 'Reasonable Mind' knows the facts. 'Wise Mind' is the overlap — the intuitive place where you honor your feelings AND make effective choices.",
+                tryThis: "Ask: 'What would my wisest self do right now?'"
+            },
+            naming: {
+                icon: "🏷️",
+                title: "Name It to Tame It",
+                description: "Research by Dr. Dan Siegel shows that simply labeling an emotion ('I feel angry') reduces amygdala activation. Naming the feeling shifts processing to the prefrontal cortex.",
+                tryThis: "Identify and say aloud the exact emotion: frustrated? hurt? scared? ashamed?"
+            }
+        };
+
+        function analyze() {
+            const problem = parseInt(problemSlider.value);
+            const reaction = parseInt(reactionSlider.value);
+            const gap = reaction - problem;
+
+            document.getElementById('resultProblem').textContent = problem;
+            document.getElementById('resultReaction').textContent = reaction;
+
+            const assessmentBox = document.getElementById('assessmentBox');
+            let assessmentClass, assessmentHTML;
+
+            if (gap <= 0) {
+                assessmentClass = 'proportional';
+                assessmentHTML = `<strong>✅ Your response appears proportional.</strong><br>
+                    Your emotional reaction (${reaction}) is at or below the severity of the problem (${problem}). 
+                    This suggests you're responding proportionally. The strategies below can still help you process and stay centered.`;
+            } else if (gap <= 2) {
+                assessmentClass = 'slightly-elevated';
+                assessmentHTML = `<strong>⚡ Slightly elevated response.</strong><br>
+                    Your reaction (${reaction}) is slightly higher than the problem warrants (${problem}). 
+                    This is very normal — a small gap like this is common. A few quick techniques can help you recalibrate.`;
+            } else if (gap <= 5) {
+                assessmentClass = 'elevated';
+                assessmentHTML = `<strong>🔶 Elevated emotional response detected.</strong><br>
+                    Your reaction (${reaction}) is notably higher than the problem severity (${problem}), creating a gap of <strong>${gap} points</strong>. 
+                    This suggests your nervous system may be in a heightened state. The strategies below are designed to help close this gap.`;
+            } else {
+                assessmentClass = 'highly-elevated';
+                assessmentHTML = `<strong>🔴 Significantly dysregulated response.</strong><br>
+                    Your reaction (${reaction}) far exceeds the problem severity (${problem}) — a gap of <strong>${gap} points</strong>. 
+                    This level of dysregulation suggests a strong fight/flight/freeze response. Start with the body-based strategies first, then move to cognitive ones once your nervous system calms.`;
+            }
+
+            assessmentBox.className = 'assessment ' + assessmentClass;
+            assessmentBox.innerHTML = assessmentHTML;
+
+            // Select strategies based on reaction intensity and gap
+            const selected = selectStrategies(problem, reaction, gap);
+            const container = document.getElementById('strategiesContainer');
+            container.innerHTML = '';
+
+            selected.forEach(key => {
+                const s = strategies[key];
+                const card = document.createElement('div');
+                card.className = 'strategy-card';
+                card.innerHTML = `
+                    <div class="strategy-icon">${s.icon}</div>
+                    <h4>${s.title}</h4>
+                    <p>${s.description}</p>
+                    <span class="try-this">💡 ${s.tryThis}</span>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function selectStrategies(problem, reaction, gap) {
+            const picks = [];
+
+            if (gap <= 0) {
+                // Proportional — offer maintenance/growth strategies
+                picks.push('perspective', 'selfCompassion', 'wise', 'journaling');
+            } else if (gap <= 2) {
+                // Slightly elevated
+                picks.push('breathing', 'naming', 'cognitive', 'perspective', 'selfCompassion');
+            } else if (gap <= 5) {
+                // Elevated
+                picks.push('breathing', 'grounding', 'naming', 'cognitive', 'opposite', 'timeout', 'validation');
+            } else {
+                // Highly dysregulated
+                picks.push('tipp', 'breathing', 'grounding', 'naming', 'timeout', 'movement', 'radical', 'opposite', 'defusion', 'wise');
+            }
+
+            // Add extra strategies for high reaction regardless of gap
+            if (reaction >= 8 && !picks.includes('tipp')) picks.unshift('tipp');
+            if (reaction >= 7 && !picks.includes('movement')) picks.push('movement');
+            if (reaction >= 6 && !picks.includes('validation')) picks.push('validation');
+
+            // Add journaling for moderate-high reactions
+            if (reaction >= 5 && !picks.includes('journaling')) picks.push('journaling');
+
+            return [...new Set(picks)]; // deduplicate
+        }
+
+        function resetTool() {
+            document.getElementById('results').style.display = 'none';
+            problemSlider.value = 5;
+            reactionSlider.value = 5;
+            problemValue.textContent = '5';
+            reactionValue.textContent = '5';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
